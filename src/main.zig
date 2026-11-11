@@ -228,6 +228,7 @@ pub fn main(init: std.process.Init) !void {
             allocator,
             io,
             args.max_retries,
+            exclude_repos orelse &.{},
         );
     } else unreachable;
     defer stats.deinit(allocator);
