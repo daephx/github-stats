@@ -29,14 +29,6 @@ jobs:
         run: |
           zig build
 
-      - name: Checkout history branch
-        run: |
-          git config --global user.name "daephx/github-stats"
-          git config --global user.email "github-stats[bot]@daephx.github.io"
-          # Push generated files to the generated branch
-          git pull
-          git checkout generated || git checkout -b generated
-
       - name: Generate images
         run: |
           ./zig-out/bin/github-stats
@@ -51,9 +43,14 @@ jobs:
           # https://github.com/orgs/community/discussions/192970
           MAX_RETRIES: 5
 
-      - name: Commit to the repo
+      - name: Deploy to generated branch
         run: |
-          git add .
-          # Force the build to succeed, even if no files were changed
-          git commit -m 'Update generated files' || true
-          git push --set-upstream origin generated
+          git config --global user.name "github-stats[bot]"
+          git config --global user.email "github-stats[bot]@daephx.github.io"
+
+          git checkout --orphan generated
+          git rm -rf . 2>/dev/null || true
+
+          git add overview.svg languages.svg
+          git commit -m "Update generated stats images" || echo "No changes"
+          git push origin generated --force
